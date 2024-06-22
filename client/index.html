@@ -26,10 +26,35 @@
     </p>
 
     <h2>Create a shortened URL</h2>
-    <form action="/api/p/create" method="POST" hx-swap="outerHTML">
-        <input type="text" name="url" placeholder="Enter URL to shorten" required pattern="(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})" />
-        <input type="text" name="alias" placeholder="Enter alias (optional)" max="32" />
-        <button type="submit">Shorten</button>
-    </form>
+    <input id="url" type="text" name="url" placeholder="Enter URL to shorten" required pattern="(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})" />
+    <input id="alias" type="text" name="alias" placeholder="Enter alias (optional)" max="32" />
+    <button type="submit" onclick="onSubmit(event)">Shorten</button>
+
+    <div id="response"></div>
 </body>
+
+<script>
+    /** @param {Event} event */
+    async function onSubmit (event) {
+        event.preventDefault();
+        
+        const url = document.getElementById('url').value;
+        const alias = document.getElementById('alias').value;
+
+        const body = new FormData();
+
+        body.append('url', url);
+        body.append('alias', alias);
+
+        const response = await fetch('/api/shorten', {
+            method: 'POST',
+            body
+        });
+
+        const data = await response.text();
+
+        document.getElementById('response').textContent = data;
+        
+    }
+</script>
 </html>

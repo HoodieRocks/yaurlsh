@@ -12,7 +12,7 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-var urlRegexp = "(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})"
+var urlRegexp = `(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})`
 
 func main() {
 	// load .env file
@@ -67,7 +67,7 @@ func RegisterRoutes(e *echo.Echo) {
 		return c.Redirect(http.StatusMovedPermanently, url)
 	})
 
-	e.POST("/api/p/create", func(c echo.Context) error {
+	e.POST("/api/shorten", func(c echo.Context) error {
 		alias := c.FormValue("alias")
 		url := c.FormValue("url")
 
@@ -86,7 +86,7 @@ func RegisterRoutes(e *echo.Echo) {
 			return c.String(http.StatusBadRequest, "URL is too long")
 		}
 
-		if regexp.MatchString(urlRegexp, url) {
+		if valid, err := regexp.MatchString(urlRegexp, url); !valid || err != nil {
 			return c.String(http.StatusBadRequest, "URL is invalid")
 		}
 
