@@ -4,12 +4,15 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/hoodierocks/yaurlsh/db"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
+
+var urlRegexp = "(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})"
 
 func main() {
 	// load .env file
@@ -79,12 +82,24 @@ func RegisterRoutes(e *echo.Echo) {
 			return c.String(http.StatusBadRequest, "URL is required")
 		}
 
+		if len(url) > 2048 {
+			return c.String(http.StatusBadRequest, "URL is too long")
+		}
+
+		if regexp.MatchString(urlRegexp, url) {
+			return c.String(http.StatusBadRequest, "URL is invalid")
+		}
+
 		if alias == "" {
 			alias, err = gonanoid.New(8)
 
 			if err != nil {
 				return c.String(http.StatusInternalServerError, "Error generating alias")
 			}
+		}
+
+		if len(alias) > 32 {
+			return c.String(http.StatusBadRequest, "Alias is too long")
 		}
 
 		err = conn.CreateURL(context.Background(), alias, url)
