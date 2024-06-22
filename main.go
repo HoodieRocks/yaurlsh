@@ -8,6 +8,7 @@ import (
 	"github.com/hoodierocks/yaurlsh/db"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 func main() {
@@ -39,19 +40,54 @@ func main() {
 	// start http server
 	e := echo.New()
 
+	RegisterRoutes(e)
+
+	e.Logger.Fatal(e.Start("localhost:1323"))
+}
+
+func RegisterRoutes(e *echo.Echo) {
 	e.GET("/:alias", func(c echo.Context) error {
 		alias := c.Param("alias")
+		conn, err := db.Connect()
+
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Error connecting to database")
+		}
+		defer conn.Close()
+
 		url, err := conn.GetURL(context.Background(), alias)
+		
 		if err != nil {
 			return c.String(http.StatusNotFound, "URL not found")
 		}
+		
 		return c.Redirect(http.StatusMovedPermanently, url)
 	})
 
-	e.POST("/p/create", func(c echo.Context) error {
+	e.POST("/api/p/create", func(c echo.Context) error {
 		alias := c.FormValue("alias")
 		url := c.FormValue("url")
-		err := conn.CreateURL(context.Background(), alias, url)
+
+		conn, err := db.Connect()
+
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "Error connecting to database")
+		}
+		defer conn.Close()
+
+		if url == "" {
+			return c.String(http.StatusBadRequest, "URL is required")
+		}
+
+		if alias == "" {
+			alias, err = gonanoid.New(8)
+
+			if err != nil {
+				return c.String(http.StatusInternalServerError, "Error generating alias")
+			}
+		}
+
+		err = conn.CreateURL(context.Background(), alias, url)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "Error creating URL")
 		}
@@ -59,9 +95,9 @@ func main() {
 	})
 
 	// add route for homepage
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Welcome to YAURLSH!")
+	e.GET("/api/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Welcome to the YAURLSH API!")
 	})
 
-	e.Logger.Fatal(e.Start("localhost:1323"))
+	e.File("/", "./client/index.html")
 }

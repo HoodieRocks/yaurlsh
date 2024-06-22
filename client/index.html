@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <title>YAURLSH - URL Shortening</title>
+</head>
+<body>
+    <h1>YAURLSH</h1>
+
+    <a href="https://github.com/hoodierocks/yaurlsh"></a>
+
+    <h2>What is YAURLSH?</h2>
+    <p>YAURLSH (Yet Another URL Shortener) is a URL shortener that generates shortened URLs.</p>
+
+    <h2>How does it work?</h2>
+    <p>It takes in a URL and returns a shortened URL</p>
+
+    <h2>How do I use it?</h2>
+    <p>
+        <ol>
+            <li>Enter the URL you want to shorten in the input field</li>
+            <li>Click the shorten button</li>
+        </ol>
+    </p>
+
+    <h2>Create a shortened URL</h2>
+    <form action="/api/p/create" method="POST" hx-swap="outerHTML">
+        <input type="text" name="url" placeholder="Enter URL to shorten" />
+        <input type="text" name="alias" placeholder="Enter alias (optional)" />
+        <button type="submit">Shorten</button>
+    </form>
+</body>
+</html>
