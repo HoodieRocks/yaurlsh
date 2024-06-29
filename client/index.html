@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/index.css">
     <title>YAURLSH - URL Shortening</title>
 </head>
 <body>
@@ -12,7 +16,7 @@
     <a href="https://github.com/hoodierocks/yaurlsh"></a>
 
     <h2>What is YAURLSH?</h2>
-    <p>YAURLSH (Yet Another URL Shortener) is a URL shortener that generates shortened URLs.</p>
+    <p>YAURLSH (Yet Another URL Shortener) is a self-hosted URL shortener.</p>
 
     <h2>How does it work?</h2>
     <p>It takes in a URL and returns a shortened URL</p>
@@ -20,15 +24,19 @@
     <h2>How do I use it?</h2>
     <p>
         <ol>
-            <li>Enter the URL you want to shorten in the input field</li>
+            <li>Enter the URL you want to shorten in the input field (and optional alias)</li>
             <li>Click the shorten button</li>
         </ol>
     </p>
 
+    <div class="divider"></div>
+
     <h2>Create a shortened URL</h2>
-    <input id="url" type="text" name="url" placeholder="Enter URL to shorten" required pattern="(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})" />
-    <input id="alias" type="text" name="alias" placeholder="Enter alias (optional)" max="32" />
-    <button type="submit" onclick="onSubmit(event)">Shorten</button>
+    <form action="/api/shorten" onsubmit="onSubmit(event)">
+        <input id="url" type="url" name="url" placeholder="Enter URL to shorten" required max="512" />
+        <input id="alias" type="text" name="alias" placeholder="Enter alias (optional)" max="32" />
+        <button type="submit">Shorten</button>
+    </form>
 
     <div id="response"></div>
 </body>

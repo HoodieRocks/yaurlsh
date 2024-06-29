@@ -12,7 +12,7 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-var urlRegexp = `(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})`
+var urlRegexp = `^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$`
 
 func main() {
 	// load .env file
@@ -33,31 +33,32 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-
+	
 	// create tables
 	err = conn.CreateTables(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// start http server
 	e := echo.New()
-
+	
 	RegisterRoutes(e)
-
+	
 	e.Logger.Fatal(e.Start("localhost:1323"))
 }
 
 func RegisterRoutes(e *echo.Echo) {
+	
 	e.GET("/:alias", func(c echo.Context) error {
 		alias := c.Param("alias")
 		conn, err := db.Connect()
-
+		
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "Error connecting to database")
 		}
 		defer conn.Close()
-
+		
 		url, err := conn.GetURL(context.Background(), alias)
 		
 		if err != nil {
@@ -67,6 +68,9 @@ func RegisterRoutes(e *echo.Echo) {
 		return c.Redirect(http.StatusMovedPermanently, url)
 	})
 
+	e.Static("/", "./client/")
+	e.File("/index.css", "./client/index.css")
+	
 	e.POST("/api/shorten", func(c echo.Context) error {
 		alias := c.FormValue("alias")
 		url := c.FormValue("url")
@@ -114,5 +118,4 @@ func RegisterRoutes(e *echo.Echo) {
 		return c.String(http.StatusOK, "Welcome to the YAURLSH API!")
 	})
 
-	e.File("/", "./client/index.html")
 }
